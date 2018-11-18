@@ -1,5 +1,5 @@
 pipeline is:
-
+<pre>
 1) scraper.py
 	a) INPUT: facebook login info in login.json
 	b) scrapes tinder for nearby user photos
@@ -24,7 +24,7 @@ pipeline is:
 	a) INPUT: facebook login info in login.json, model.h5
 	b) automatically swipes based on model preferences
 	c) OUTPUT: matches.csv to store past session matches
-
+</pre>
 TODO: combine into makefile, also use online learning instead
 
 also rm -rf previously made directories
