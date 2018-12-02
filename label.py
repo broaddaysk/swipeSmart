@@ -85,3 +85,7 @@ root.mainloop()
 # TODO: fix freezing issue that occurs close to the end (can't tell if frozen or finished)
 
 # also add undo function
+
+# check instagram photo sizes, need to resize canvas?
+
+# log number of sorted images in like/dislike folders

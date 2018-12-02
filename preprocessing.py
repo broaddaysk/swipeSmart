@@ -82,4 +82,4 @@ if __name__ == '__main__':
 # need to check relative and absolute sizes of likes/dislikes
 # if either category has too few, give warning (what is baseline?)
 
-
+# log amount of like/dislike images after processing

@@ -1,0 +1,59 @@
+pipeline is:
+
+1) scraper.py
+	a) INPUT: facebook login info in login.json
+	b) scrapes tinder for nearby user photos
+	c) OUTPUT: dataset folder with user_id subfolders containing their respective photos
+
+2) label.py
+	a) INPUT: dataset folder
+	b) manually sort dataset into like/dislike using tinderesque GUI (left arrow key=dislike, right arrow key=like)
+	c) OUTPUT: sorted_data folder with like and dislike subfolders containing photos
+
+3) preprocessing.py
+	a) INPUT: sorted_data folder
+	b) convert all photos to greyscale and resize, then convert images and labels into npy
+	c) OUTPUT: processed_like/processed_dislike subfolders in sorted_data, processed_images.npy, processed_labels.npy
+
+4) train.py
+	a) INPUT: processed_images.npy, processed_labels.npy
+	b) train model
+	c) OUTPUT: model.h5
+
+5) bot.py
+	a) INPUT: facebook login info in login.json, model.h5
+	b) automatically swipes based on model preferences
+	c) OUTPUT: matches.csv to store past session matches
+
+TODO: combine into makefile, also use online learning instead
+
+also rm -rf previously made directories
+
+considerations for providing as service:
+	1) from users perspective:
+		a) provide fb login info 
+		b) swipe through standardized testing set (how to make a good one?) used to evaluate model accuracy
+		c) user swipes as they normally would on their tinder nearby users
+		d) model is trained in the background (using our training set boosting), once model accuracy on test set reaches a certain threshold we can give user option to fully automate. since it runs on the cloud, user does not need to keep app open
+		e) as mobile app, would send notifications for any matches at the end of each session
+
+	2) why is this a convincing service to provide? what are our monetization options?
+		a) full automation with as little involvement as possible
+		b) more specifically, the goal of the user with tinder is to quickly get access to as many prospects as possible with minimal effort
+		c) automation reduces effort, and increases match throughput indirectly. however, how can we improve the match rate? best way would probably be to improve user's profile
+		d) possible approaches:
+			1) if we had access to match data, we could use regression model to look for profile characteristics that improve match odds
+			2) intuitively, pictures probably have by far the highest weight in final match decision, followed by profile (sentiment analysis, length, keywords)
+			3) we can provide general profile creation guidelines, or a rating (is this meaningful?)
+			4) perhaps we can use the models that we've trained to reflect user preferences as an evaluation method (have pantheon of models, or create one composite user?)
+			5) have user provide a folder of many potential profile images, and several possible bios
+			6) evaluate odds using our evaluation models, and find the best combination and set it for user
+		e) subscription model for service? or charge based on matches?
+		f) why is this a compelling service for women (or potentially very attractive men)? people with a high volume of matches don't need automation for getting matches, instead they prioritize quality of partner
+		g) rating system? how to create?
+			1) too much effort to have users rate each match
+			2) instead, assume that successful matches follow a general format, resulting in sharing external contact info
+			3) we can look at conversation metrics (length, user response times, contact info sharing) to determine if match was successful
+			4) build rating system around ratio of successful-unsuccessful matches
+			5) generally speaking, sharing contact info marks a successful match since we cannot control what happens outside tinder's platform. however, to make the rating system robust, we should add consideration for serial flakers and scammers via reporting (taking into account history should add resilience againt report abusers as well, maybe rating immunity for sparse, non-consecutive reports)
+		h) assuming we have rating system, for high match volume users we can give option to only notify them about highly rated matches, while filtering out the rest

@@ -64,3 +64,8 @@ if __name__ == '__main__':
 	print("Accuracy: " + str(score[1]))
 
 	new_model.save('model.h5')
+
+	# log loss, accuracy per model
+	# need better test harness for evaluating different models quickly
+
+	# is it feasible to train on local machine, or mass test on cloud?
