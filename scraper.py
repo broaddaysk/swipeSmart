@@ -4,10 +4,14 @@ import re
 import os
 import sys
 import json
-import urllib
+from urllib import request
+import shutil
 
-MOBILE_USER_AGENT = r"Mozilla/5.0 (Linux; U; en-gb; KFTHWI Build/JDQ39) AppleWebKit/535.19 (KHTML, like Gecko) Silk/3.16 Safari/535.19"
+#MOBILE_USER_AGENT = r"Mozilla/5.0 (Linux; U; en-gb; KFTHWI Build/JDQ39) AppleWebKit/535.19 (KHTML, like Gecko) Silk/3.16 Safari/535.19"
+MOBILE_USER_AGENT = "Tinder/7.5.3 (iPhone; iOS 10.3.2; Scale/2.00)"
+
 FB_AUTH = "https://m.facebook.com/v2.6/dialog/oauth?redirect_uri=fb464891386855067%3A%2F%2Fauthorize%2F&display=touch&state=%7B%22challenge%22%3A%22IUUkEUqIGud332lfu%252BMJhxL4Wlc%253D%22%2C%220_auth_logger_id%22%3A%2230F06532-A1B9-4B10-BB28-B29956C71AB1%22%2C%22com.facebook.sdk_client_state%22%3Atrue%2C%223_method%22%3A%22sfvc_auth%22%7D&scope=user_birthday%2Cuser_photos%2Cuser_education_history%2Cemail%2Cuser_relationship_details%2Cuser_friends%2Cuser_work_history%2Cuser_likes&response_type=token%2Csigned_request&default_audience=friends&return_scopes=true&auth_type=rerequest&client_id=464891386855067&ret=login&sdk=ios&logger_id=30F06532-A1B9-4B10-BB28-B29956C71AB1&ext=1470840777&hash=AeZqkIcf-NEW6vBd"
+#FB_AUTH = "https://www.facebook.com/v2.6/dialog/oauth?redirect_uri=fb464891386855067%3A%2F%2Fauthorize%2F&display=touch&state=%7B%22challenge%22%3A%22IUUkEUqIGud332lfu%252BMJhxL4Wlc%253D%22%2C%220_auth_logger_id%22%3A%2230F06532-A1B9-4B10-BB28-B29956C71AB1%22%2C%22com.facebook.sdk_client_state%22%3Atrue%2C%223_method%22%3A%22sfvc_auth%22%7D&scope=user_birthday%2Cuser_photos%2Cuser_education_history%2Cemail%2Cuser_relationship_details%2Cuser_friends%2Cuser_work_history%2Cuser_likes&response_type=token%2Csigned_request&default_audience=friends&return_scopes=true&auth_type=rerequest&client_id=464891386855067&ret=login&sdk=ios&logger_id=30F06532-A1B9-4B10-BB28-B29956C71AB1&ext=1470840777&hash=AeZqkIcf-NEW6vBd"
 
 def get_access_token(email, password):
     s = robobrowser.RoboBrowser(user_agent=MOBILE_USER_AGENT, parser="lxml")
@@ -43,28 +47,48 @@ def get_login_info():
 # This function logs someone into tinder and stores photos of nearby users into
 # a directory called data_set. Each user has their own folder in data_set.
 def get_tinder_users(access_token):
+  if os.path.exists('/media/broaddaysk/F202E7DA02E7A1B9/dataset/'):
+    shutil.rmtree('/media/broaddaysk/F202E7DA02E7A1B9/dataset/')
+
   session = pynder.Session(access_token)
   users = session.nearby_users()
+
+  opener = request.build_opener()
+  opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+  request.install_opener(opener)
+
+  count = 0
+  count_pics = 0
   for u in users:
     # data_set folder required. May want to change the following line to save
     # photos elsewhere.
-    directory = 'dataset/' + str(u.id)
+    directory = '/media/broaddaysk/F202E7DA02E7A1B9/dataset/' + str(u.id)
     if not os.path.exists(directory):
       img_tinder = u.get_photos('320')
       os.makedirs(directory)
-      for x in range(len(img_tinder)):
-        print(img_tinder[x])
+      for idx in range(len(img_tinder)):
+        #print(img_tinder[idx])
 
-        req_tinder = urllib.request.Request(img_tinder[x])
-        urllib.request.urlretrieve(req_tinder, directory + '/' + str(u.id) + str(x) + '.jpg')
-        #urllib.request.urlretrieve(img[x], directory + '/' + str(u.id) + str(x) + '.jpg')
+        request.urlretrieve(img_tinder[idx], directory + '/' + str(u.id) + 'num' + str(idx) + '.jpg')
+        count_pics = count_pics + 1
+        print("downloaded photo count: " + str(count_pics))
 
       img_insta = u.instagram_photos
-      for idx in range(len(img_insta)):
-        print(img_insta[idx])
+      if img_insta != None:
+        #print(img_insta)
+        for idx in range(len(img_insta)):
+          #print(img_insta[idx])
 
-        req_insta = urllib.request.Request(img_insta[idx])
-        urllib.request.urlretrieve(req_insta, directory + '/' + str(u.id) + 'i' + str(idx) + '.jpg')
+          request.urlretrieve(img_insta[idx]['image'], directory + '/' + 'i' + str(u.id) + 'num' + str(idx) + '.jpg')
+          count_pics = count_pics + 1
+          print("downloaded photo count: " + str(count_pics))
+
+      count = count + 1
+      print("downloaded user count: " + str(count))
+
+
+  print("total users: " + str(count))
+  print("total pics: " + str(count_pics))
 
 if __name__ == '__main__':
   login = get_login_info()
@@ -77,3 +101,5 @@ if __name__ == '__main__':
 # can get more pictures per user by scraping instagram, but will this bias?
 
 # log the total number of images scraped for reference
+
+# use tinder-api instead of pynder?
